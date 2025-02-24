@@ -3,7 +3,7 @@ CPPFLAGS = -g
 CPPWARNINGS = -Wall -pedantic
 DEPDIR = deps
 OBJDIR = objs
-LIBS = -lGLEW -lGL -lGLU -lglut -lglfw
+LIBS = -lGLEW -lGL -lGLU -lglut -lglfw  
 # Find all .cpp files and their respective directories
 CPPSOURCEFILES = $(shell find . -name '*.cpp')
 # Get the object files paths corresponding to source files
