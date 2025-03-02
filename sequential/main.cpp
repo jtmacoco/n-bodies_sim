@@ -65,13 +65,18 @@ int main()
     }
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // will resize viewpoart when window re-sizes
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     float vertex[] = {0.0f, 0.0f}; // this is for a point aka a particle in my case
-    unsigned int VBO;              // vertex buffer
+    glPointSize(10.0f);
+
+    GLuint VBO;              // vertex buffer
+    GLuint VAO;//like playlist stores ptr's to different VBO's
+    glGenVertexArrays(1, &VAO);//create a new playlist
     glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindVertexArray(VAO);//bind vertex array object like save profile analogy
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);//adding songs to playlist
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_DYNAMIC_DRAW);
 
     std::stringstream buffer;
@@ -88,9 +93,9 @@ int main()
     shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vert_shader);
     glAttachShader(shaderProgram, frag_shader);
+    glLinkProgram(shaderProgram);
     int success;
     char infoLog[512];
-
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success)
     {
@@ -102,11 +107,15 @@ int main()
     glDeleteShader(frag_shader);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+
     while (!glfwWindowShouldClose(window))
     {
         glfwSwapBuffers(window);
         processInput(window);
-
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_POINTS,0,1);
         glfwPollEvents(); // checks if events are triggered
     }
     glfwTerminate();
