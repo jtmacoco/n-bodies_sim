@@ -68,7 +68,10 @@ int main()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    float vertex[] = {0.0f, 0.0f}; // this is for a point aka a particle in my case
+    float vertex[] = {
+        0.0f, 0.0f,
+        0.5f, 0.5f,
+    }; // this is for a point aka a particle in my case
     glPointSize(10.0f);
 
     GLuint VBO;              // vertex buffer
@@ -115,9 +118,10 @@ int main()
         processInput(window);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS,0,1);
+        glDrawArrays(GL_POINTS,0,2);
         glfwPollEvents(); // checks if events are triggered
     }
+    glBindVertexArray(0);//bind vertex array object like save profile analogy
     glfwTerminate();
     return 0;
 }
