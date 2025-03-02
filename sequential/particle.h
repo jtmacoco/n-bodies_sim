@@ -1,10 +1,12 @@
 #pragma once
-
+#include <iostream>
+#include <memory>
 class Partcile{
     public:
-        Partcile(){};
+        Partcile(float x, float y):x(x),y(y){};
+        std::shared_ptr<float[]> getVertex();
     private:
-        double x = 0.0;
-        double y = 0.0;
-        double weight;
+        float x;
+        float y;
+        float weight;
 };

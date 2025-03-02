@@ -3,3 +3,5 @@ objs/
 main
 glad.zip
 include/
+.vscode/
+settings.json
