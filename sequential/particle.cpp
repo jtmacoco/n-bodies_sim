@@ -1,8 +1,18 @@
 #include "particle.h"
-std::shared_ptr<float[]> Partcile::getVertex()
+glm::vec3 Particle::getPosition()
 {
-    std::shared_ptr<float[]> vertex_data(new float[2]);
-    vertex_data[0] = x;
-    vertex_data[1] = y;
-    return vertex_data;
+    return pos;
+}
+float Particle::getMass(){
+    return mass;
+}
+float Particle::getAcceleration(){
+    return acceleration;
+}
+void Particle::update()
+{
+    pos.y += 0.001f;
+    if(pos.y > 1.0f){
+        pos.y = -1.0f;
+    }
 }

@@ -16,5 +16,5 @@ class Particles
     private:
         GLuint VAO; 
         GLuint VBO; 
-        std::vector<std::shared_ptr<Partcile> > particles;
+        std::vector<std::shared_ptr<Particle> > particles;
 };

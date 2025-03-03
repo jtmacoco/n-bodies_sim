@@ -12,7 +12,7 @@ void Particles::prepRender()
 }
 void Particles::addParticle(float x, float y)
 {
-    std::shared_ptr<Partcile> p(new Partcile(x, y));
+    std::shared_ptr<Particle> p(new Particle(x, y));
     particles.push_back(p);
 }
 void Particles::render()
@@ -21,8 +21,9 @@ void Particles::render()
     std::vector<float> vertex_data;
     for (auto &p : particles)
     {
-        float x = p->getVertex()[0];
-        float y = p->getVertex()[1];
+        p->update();
+        float x = p->getPosition().x;
+        float y = p->getPosition().y;
         vertex_data.push_back(x);
         vertex_data.push_back(y);
     }

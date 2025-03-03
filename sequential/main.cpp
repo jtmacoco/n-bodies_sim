@@ -1,15 +1,26 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "particle.h"
 #include "particles.h"
+#define G 6.674e-11
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+float getDistance(float x1, float y1, float x2, float y2){
+    float distance = std::sqrt(std::pow(x2-x1,2)+ std::pow(y2-y1,2));
+    return distance;
+}
+float gravitationalForce(Particle p1, Particle p2){
+    return 0.0;
+}
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -100,15 +111,15 @@ int main()
     glDeleteShader(frag_shader);
 
     ps.addParticle(0.0f,0.0f);
-    ps.addParticle(0.2f,0.2f);
     ps.prepRender();
 
     while (!glfwWindowShouldClose(window))
     {
-        glfwSwapBuffers(window);
+        glClear(GL_COLOR_BUFFER_BIT);
         processInput(window);
         glUseProgram(shaderProgram);
         ps.render();
+        glfwSwapBuffers(window);
         glfwPollEvents(); // checks if events are triggered
     }
     glfwTerminate();
