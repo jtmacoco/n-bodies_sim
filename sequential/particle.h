@@ -7,7 +7,8 @@ class Particle{
         Particle(float x, float y):x(x),y(y){
             mass = 10;
             acceleration = 0;
-            velocity= glm::vec3(0,0,0);
+            velocity = glm::vec3(0,0,0);
+            force = glm::vec3(0,0,0);
             pos = glm::vec3(x,y,0);
 
         };
@@ -22,4 +23,5 @@ class Particle{
         float acceleration; 
         glm::vec3 pos;
         glm::vec3 velocity;
+        glm::vec3 force;
 };

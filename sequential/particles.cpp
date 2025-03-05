@@ -37,3 +37,24 @@ void Particles::render()
     glDrawArrays(GL_POINTS, 0, particles.size());
     glBindVertexArray(0);
 }
+glm::vec3 Particles::sumForces(){
+    for(int i = 0; i < particles.size(); i++){
+        std::shared_ptr<Particle> cur_particle = particles[i];
+        for(int j = 0; j < particles.size(); j++){
+            if(j == i){continue;}
+
+
+        }
+    }
+}
+glm::vec3 Particles::gravitationalForce(Particle p1, Particle p2){
+    glm::vec3 p1_pos = p1.getPosition();
+    float p1_mass = p1.getMass();
+    glm::vec3 p2_pos = p2.getPosition();
+    float p2_mass = p2.getMass();
+    glm::vec3 distance = p2_pos-p1_pos;
+    float r = glm::length(distance);//maginuted 
+    glm::vec3 r_unit = glm::normalize(distance);
+    float force = G * ((p1_mass*p2_mass)/ (r*r));
+    return force*r_unit;
+}
