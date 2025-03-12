@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <random>
+#include <tuple>
 #include <cmath>
 #include "particle.h"
 #include <glad/glad.h>
@@ -23,8 +24,9 @@ class Particles
         void initVel();
         void initPos();
         void initSystem();
-        glm::vec3 gravitationalForce(Particle p1, Particle p2);
+        //std::tuple<glm::vec3, glm::vec3> randCircle();
         glm::vec3 randCircle();
+        glm::vec3 gravitationalForce(Particle p1, Particle p2);
 
     private:
         GLuint VAO; 
