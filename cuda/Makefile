@@ -10,7 +10,7 @@ CPPSOURCEFILES = $(shell find . -name '*.cpp')
 OBJFILES = $(CPPSOURCEFILES:%.cpp=$(OBJDIR)/%.o)
 DEPFILES = $(CPPSOURCEFILES:%.cpp=$(DEPDIR)/%.d)
 main: $(OBJFILES)
-	$(CXX) -g -o main $(OBJFILES)  $(LIBS)
+	nvcc -g -o main main.cu $(OBJFILES)  $(LIBS)
 
 $(OBJDIR)/%.o : %.cpp $(DEPDIR)/%.d | $(DEPDIR) $(OBJDIR)
 	$(CXX) $(DEPFLAGS) $(CPPFLAGS) $(CPPWARNINGS) $(MACRO_DEFINITIONS) -o $@ -c $<

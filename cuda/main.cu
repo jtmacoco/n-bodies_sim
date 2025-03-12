@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <cuda.h>
 #include <fstream>
 #include <cmath>
 #include <sstream>
