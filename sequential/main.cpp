@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include <fstream>
 #include <cmath>
 #include <sstream>
@@ -103,20 +104,29 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-
-    ps.addParticle(0.0f,0.0f);
-    ps.addParticle(0.1f,0.1f);
-    ps.addParticle(0.2f,0.2f);
+    for(int i = 0; i < 1000; i++){
+        ps.addParticle(1.0f);
+    }
     ps.prepRender();
-
+    glfwSwapInterval(1);
+    float lastTime = glfwGetTime();
+    float targetFrameTime = 1.0f/60.0f;//should be 60fps
     while (!glfwWindowShouldClose(window))
     {
+        float curTime = glfwGetTime();
+        float dt = curTime-lastTime;
+        lastTime = curTime;
         glClear(GL_COLOR_BUFFER_BIT);
         processInput(window);
         glUseProgram(shaderProgram);
-        ps.render();
+        ps.render(dt);
         glfwSwapBuffers(window);
         glfwPollEvents(); // checks if events are triggered
+        float frameDuration = glfwGetTime() - curTime;
+        if (frameDuration < targetFrameTime) {//helps maintain frame rate
+            float sleepTime = targetFrameTime - frameDuration;
+            std::this_thread::sleep_for(std::chrono::duration<float>(sleepTime));
+        }
     }
     glfwTerminate();
     return 0;

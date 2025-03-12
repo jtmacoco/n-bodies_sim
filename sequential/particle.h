@@ -4,24 +4,24 @@
 #include <memory>
 class Particle{
     public:
-        Particle(float x, float y):x(x),y(y){
-            mass = 10;
-            acceleration = 0;
-            velocity = glm::vec3(0,0,0);
-            force = glm::vec3(0,0,0);
-            pos = glm::vec3(x,y,0);
-
+        Particle(glm::vec3 pos,glm::vec3 velocity, float mass):pos(pos),velocity(velocity),mass(mass){
+            force = 0.0f;
+            acceleration= glm::vec3(0);
         };
-        void update();
+        void applyForce(glm::vec3 incoming_force, float dt);
+        void setVelocity(glm::vec3 v);
+        void setPosition(glm::vec3 p);
         float getMass();
-        float getAcceleration();
+        float getForce();
+        glm::vec3 getAcceleration();
+        glm::vec3 getVelocity();
         glm::vec3 getPosition();
+
     private:
-        float x;
-        float y;
-        float mass; 
-        float acceleration; 
+        
+        glm::vec3 acceleration; 
         glm::vec3 pos;
         glm::vec3 velocity;
-        glm::vec3 force;
+        float mass; 
+        float force;
 };
