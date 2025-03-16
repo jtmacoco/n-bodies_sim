@@ -1,27 +1,29 @@
 #pragma once
 #include <iostream>
 #include <glm/glm.hpp>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include <memory>
 class Particle{
     public:
-        Particle(glm::vec3 pos,glm::vec3 velocity, float mass):pos(pos),velocity(velocity),mass(mass){
+        Particle(float3 pos,float3 velocity, float mass):pos(pos),velocity(velocity),mass(mass){
             force = 0.0f;
-            acceleration= glm::vec3(0);
+            acceleration= make_float3(0.0f,0.0f,0.0f);
         };
-        void applyForce(glm::vec3 incoming_force, float dt);
-        void setVelocity(glm::vec3 v);
-        void setPosition(glm::vec3 p);
+        void applyForce(float3 incoming_force, float dt);
+        void setVelocity(float3 v);
+        void setPosition(float3 p);
         float getMass();
         float getForce();
-        glm::vec3 getAcceleration();
-        glm::vec3 getVelocity();
-        glm::vec3 getPosition();
+        float3 getAcceleration();
+        float3 getVelocity();
+        float3 getPosition();
 
     private:
         
-        glm::vec3 acceleration; 
-        glm::vec3 pos;
-        glm::vec3 velocity;
+        float3 acceleration; 
+        float3 pos;
+        float3 velocity;
         float mass; 
         float force;
 };

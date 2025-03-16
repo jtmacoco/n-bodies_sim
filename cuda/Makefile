@@ -1,28 +1,29 @@
-CXX = g++
-CPPFLAGS = -g
-CPPWARNINGS = -Wall -pedantic
+CXX = nvcc
+CXX_CPP = g++  # Compiler for C++ files
+
 DEPDIR = deps
 OBJDIR = objs
 LIBS = -lGLEW -lGL -lGLU -lglut -lglfw  
-# Find all .cpp files and their respective directories
-CPPSOURCEFILES = $(shell find . -name '*.cpp')
-# Get the object files paths corresponding to source files
-OBJFILES = $(CPPSOURCEFILES:%.cpp=$(OBJDIR)/%.o)
-DEPFILES = $(CPPSOURCEFILES:%.cpp=$(DEPDIR)/%.d)
-main: $(OBJFILES)
-	nvcc -g -o main main.cu $(OBJFILES)  $(LIBS)
 
-$(OBJDIR)/%.o : %.cpp $(DEPDIR)/%.d | $(DEPDIR) $(OBJDIR)
-	$(CXX) $(DEPFLAGS) $(CPPFLAGS) $(CPPWARNINGS) $(MACRO_DEFINITIONS) -o $@ -c $<
-# Create the necessary directories
+CU_SOURCES = $(shell find . -name '*.cu')
+CPP_SOURCES = $(shell find . -name '*.cpp')
+
+CU_OBJECTS = $(CU_SOURCES:%.cu=$(OBJDIR)/%.o)
+CPP_OBJECTS = $(CPP_SOURCES:%.cpp=$(OBJDIR)/%.o)
+OBJFILES = $(CU_OBJECTS) $(CPP_OBJECTS)
+
+main: $(OBJFILES)
+	$(CXX) -g -o main $(OBJFILES) $(LIBS)
+
+$(OBJDIR)/%.o : %.cu | $(DEPDIR) $(OBJDIR)
+	$(CXX) -c $< -o $@
+
+$(OBJDIR)/%.o : %.cpp | $(DEPDIR) $(OBJDIR)
+	$(CXX_CPP) -c $< -o $@
+
+# Create necessary directories
 $(DEPDIR): ; @mkdir -p $@
 $(OBJDIR): ; @mkdir -p $@
 
-
-# Include dependency files
-$(DEPFILES):
-include $(wildcard $(DEPFILES))
-
-# Clean up generated files
 clean:
 	rm -rf $(OBJDIR) $(DEPDIR) main

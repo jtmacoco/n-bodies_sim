@@ -13,9 +13,9 @@ void Particles::prepRender()
 }
 void Particles::addParticle(float mass)
 {
-    glm::vec3 pos = randCircle();
-    glm::vec3 vel = randCircle();
-    std::shared_ptr<Particle> p(new Particle(pos,vel,mass));//change this to glm::vec3 for pos and vel
+    float3 pos = randCircle();
+    float3 vel = randCircle();
+    std::shared_ptr<Particle> p(new Particle(pos,vel,mass));//change this to float3 for pos and vel
     particles.push_back(p);
 }
 void Particles::render(float dt)
@@ -42,13 +42,17 @@ void Particles::render(float dt)
     glBindVertexArray(0);
 }
 /*Initlizing random position and velocities to be within a circle that is of random radius*/
-glm::vec3 Particles::randCircle(){
+float3 Particles::randCircle(){
     static std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
     static std::uniform_real_distribution<float> dist_radius(0.0f, 0.8f);
 
     float theta = dist_theta(gen);  
     float r = dist_radius(gen);       
-    return glm::vec3(std::cos(theta),std::sin(theta),0.0f)*r;
+    float3 res = make_float3(std::cos(theta),std::sin(theta),0.0f);
+    res.x*=r;
+    res.y*=r;
+    res.z*=r;
+    return res;
 }
 /*summing up the forces*/
 void Particles::sumForces(float dt)
@@ -56,51 +60,69 @@ void Particles::sumForces(float dt)
     for (int i = 0; i < int(particles.size()); i++)
     {
         std::shared_ptr<Particle> cur_particle = particles[i];
-        glm::vec3 force_sum(0.0f);
+        float3 force_sum = make_float3(0.0f,0.0f,0.0f);
         for (int j = i+1; j < int(particles.size()); j++)
         {
             if (j == i)
             {
                 continue;
             }
-            force_sum += gravitationalForce(*cur_particle, *particles[j]);
+            float3 gF = gravitationalForce(*cur_particle, *particles[j]);
+            force_sum.x+=gF.x;
+            force_sum.y+=gF.y;
+            force_sum.z+=gF.z;
             //printf("x: %f, y: %f \n",force_sum.x,force_sum.y);
         }
         cur_particle->applyForce(force_sum, dt);
     }
 } 
-glm::vec3 Particles::gravitationalForce(Particle p1, Particle p2)
+float3 Particles::gravitationalForce(Particle p1, Particle p2)
 {
     float eps = 2.0f;//needed so force doesn't get to big shooting particles everywhere
-    glm::vec3 p1_pos = p1.getPosition();
+    float3 p1_pos = p1.getPosition();
     float p1_mass = p1.getMass();
 
-    glm::vec3 p2_pos = p2.getPosition();
+    float3 p2_pos = p2.getPosition();
     float p2_mass = p2.getMass();
 
-    glm::vec3 distance = p2_pos - p1_pos;//distance between 2 particles
+    float3 distance = make_float3(p2_pos.x - p1_pos.x, p2_pos.y - p1_pos.y, p2_pos.z - p1_pos.z);//distance between 2 particles
 
-    float r = glm::length(distance); //  length of the vector
+    float r = sqrtf(distance.x * distance.x + distance.y * distance.y + distance.z * distance.z); //  length of the vector
 
-    glm::vec3 r_unit = glm::normalize(distance);//unit vector
+    float3 r_unit = make_float3(distance.x / r, distance.y / r, distance.z / r);
     float force = G * ((p1_mass * p2_mass) /((r * r)+(eps*eps)));//gravitational force equation
-    return force * r_unit;//multiple by unit vector for direction of the force so provides direction
+
+    float3 gF = make_float3(force*r_unit.x, force*r_unit.y, force*r_unit.z);
+    return gF;
 }
 /*grab average velocity over all particles in the system*/
 void Particles::initVel(){
-    avg_vel=glm::vec3(0.0f);
+    avg_vel= make_float3(0.0f,0.0f,0.0f);
     for(auto &p:particles){
-        avg_vel += p->getVelocity()*p->getMass();
+        float3 cur_vel = p->getVelocity();
+        float cur_mass = p->getMass();
+
+        avg_vel.x += (cur_vel.x *cur_mass);
+        avg_vel.y += (cur_vel.y *cur_mass);
+        avg_vel.z += (cur_vel.z *cur_mass);
     }
-    avg_vel/=particles.size();
+    avg_vel.x /=particles.size();
+    avg_vel.y /=particles.size();
+    avg_vel.z /=particles.size();
 }
 /*grab center of mass of the system basically*/
 void Particles::initPos(){
-    center_mass = glm::vec3(0.0f);
+    center_mass = make_float3(0.0f,0.0f,0.0f);
     for(auto &p:particles){
-        center_mass += p->getPosition()*p->getMass();
+        float3 cur_pos = p->getPosition();
+        float cur_mass = p->getMass();
+        center_mass.x += (cur_pos.x*cur_mass);
+        center_mass.y += (cur_pos.y*cur_mass);
+        center_mass.z += (cur_pos.z*cur_mass);
     }
-    center_mass/=particles.size();
+    center_mass.x /=particles.size();
+    center_mass.y /=particles.size();
+    center_mass.z /=particles.size();
 }
 /*This is meant to intilize the conditions at the start of the simulation.*/
 void Particles::initSystem(){

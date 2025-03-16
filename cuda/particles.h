@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <random>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include <cmath>
 #include "particle.h"
 #include <glad/glad.h>
@@ -23,15 +25,15 @@ class Particles
         void initVel();
         void initPos();
         void initSystem();
-        glm::vec3 gravitationalForce(Particle p1, Particle p2);
-        glm::vec3 randCircle();
+        float3 gravitationalForce(Particle p1, Particle p2);
+        float3 randCircle();
 
     private:
         GLuint VAO; 
         GLuint VBO; 
         std::mt19937 gen;
         std::vector<std::shared_ptr<Particle> > particles;
-        glm::vec3 center_mass;
-        glm::vec3 avg_vel;
+        float3 center_mass;
+        float3 avg_vel;
         float particle_size;
 };
