@@ -11,7 +11,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "particle.h"
 #include "particles.h"
 
 #define WINDOW_WIDTH 800
@@ -105,9 +104,6 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for(int i = 0; i < 1000; i++){
-        ps.addParticle(1.0f);
-    }
     ps.prepRender();
     glfwSwapInterval(1);
     float lastTime = glfwGetTime();

@@ -3,7 +3,7 @@ CXX_CPP = g++  # Compiler for C++ files
 
 DEPDIR = deps
 OBJDIR = objs
-LIBS = -lGLEW -lGL -lGLU -lglut -lglfw  
+LIBS = -lGLEW -lGL -lGLU -lglut -lglfw -lcudadevrt 
 
 CU_SOURCES = $(shell find . -name '*.cu')
 CPP_SOURCES = $(shell find . -name '*.cpp')
@@ -16,7 +16,7 @@ main: $(OBJFILES)
 	$(CXX) -g -o main $(OBJFILES) $(LIBS)
 
 $(OBJDIR)/%.o : %.cu | $(DEPDIR) $(OBJDIR)
-	$(CXX) -c $< -o $@
+	$(CXX)  --relocatable-device-code true -c $< -o $@
 
 $(OBJDIR)/%.o : %.cpp | $(DEPDIR) $(OBJDIR)
 	$(CXX_CPP) -c $< -o $@

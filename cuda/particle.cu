@@ -1,9 +1,9 @@
 #include "particle.h"
-float3 Particle::getPosition()
+__host__ __device__ float3 Particle::getPosition()
 {
     return pos;
 }
-float Particle::getMass(){
+__host__ __device__ float Particle::getMass(){
     return mass;
 }
 void Particle::setVelocity(float3 v){
@@ -25,7 +25,7 @@ void Particle::setPosition(float3 p){
 float Particle::getForce(){
     return force;
 }
-void Particle::applyForce(float3 incoming_force, float dt){
+__host__ __device__ void Particle::applyForce(float3 incoming_force, float dt){
 
     pos.x += (velocity.x * dt);
     pos.y += (velocity.y * dt);
