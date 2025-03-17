@@ -23,7 +23,7 @@ __global__ void sumForces(
     float3 *forces)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if(i > MX_PARTICLES){return;}
+    if(i >= MX_PARTICLES){return;}
     Particle &cur_particle = particles[i];
     float3 force_sum = make_float3(0.0f, 0.0f, 0.0f);
     for (int j = 0; j < MX_PARTICLES; j++)
@@ -47,7 +47,7 @@ __global__ void applyForces(
     float dt)
 {
      int i = blockIdx.x * blockDim.x + threadIdx.x;
-     if(i > MX_PARTICLES){return;}
+     if(i >= MX_PARTICLES){return;}
         particles[i].applyForce(forces[i], dt);
 }
 void Particles::prepRender()
@@ -78,18 +78,19 @@ __host__ void Particles::render(float dt)
     dt = 0.001; // maybe adjust
     glBindVertexArray(VAO);
     std::vector<float> vertex_data;
-    int threadsPerBlock = 256; // Optimal thread count per block
-    int maxBlocks = 256;
+    int threadsPerBlock = 1024; 
+    //int maxBlocks = 256;
     //int blocksPerGrid =maxBlocks;
-    int blocksPerGrid = (MX_PARTICLES + threadsPerBlock - 1) / threadsPerBlock;
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess)
-    {
-        printf("CUDA Error in sumForces: %s\n", cudaGetErrorString(err));
-    }
+    int blocksPerGrid = (MX_PARTICLES + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
     sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces);
     applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt);
     cudaDeviceSynchronize();
+    for(int i=0; i < MX_PARTICLES; i++){
+        float x = particles[i].getPosition().x;
+        float y = particles[i].getPosition().y;
+        vertex_data.push_back(x);
+        vertex_data.push_back(y);
+    }
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     /*
         note allocating space for the memory in prep can now can just fill the space with
