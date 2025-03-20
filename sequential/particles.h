@@ -15,7 +15,7 @@ class Particles
     public:
         Particles(){
             gen.seed(1);
-            particle_size = 1.0f;
+            particle_size = 3.0f;
         };
         void addParticle(float mass);
         void prepRender();

@@ -56,7 +56,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // for MAC
-    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Sequential", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -104,7 +104,7 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 700; i++){
         ps.addParticle(1.0f);
     }
     ps.prepRender();

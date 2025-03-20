@@ -56,7 +56,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // for MAC
-    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Cuda", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -120,10 +120,12 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents(); // checks if events are triggered
         float frameDuration = glfwGetTime() - curTime;
+        /*
         if (frameDuration < targetFrameTime) {//helps maintain frame rate
             float sleepTime = targetFrameTime - frameDuration;
             std::this_thread::sleep_for(std::chrono::duration<float>(sleepTime));
         }
+*/
     }
     glfwTerminate();
     return 0;

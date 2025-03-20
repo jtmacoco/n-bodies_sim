@@ -11,7 +11,7 @@
 #include <iostream>
 // #define G 6.674e-11
 #define G 1.0f // set to 1 because actual G constant is super small
-#define MX_PARTICLES 15000
+#define MX_PARTICLES 50000
 
 class Particles
 {
@@ -22,7 +22,7 @@ public:
         cudaMallocManaged(&forces, sizeof(float3) * MX_PARTICLES);
         cudaMallocManaged(&particles, sizeof(Particle) * MX_PARTICLES);
         gen.seed(1);
-        particle_size = 1.0f;
+        particle_size = 3.0f;
     };
     // void addParticle(float mass);
     void initParticles();
