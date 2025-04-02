@@ -104,7 +104,7 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 2000; i++){
         ps.addParticle(1.0f);
     }
     ps.prepRender();
