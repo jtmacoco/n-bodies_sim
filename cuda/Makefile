@@ -3,7 +3,7 @@ CXX_CPP = g++  # Compiler for C++ files
 
 DEPDIR = deps
 OBJDIR = objs
-LIBS = -lGLEW -lGL -lGLU -lglut -lglfw -lcudadevrt 
+LIBS = -lGLEW -lGL -lGLU -lglut -lglfw -lcudadevrt -lcuda
 
 CU_SOURCES = $(shell find . -name '*.cu')
 CPP_SOURCES = $(shell find . -name '*.cpp')

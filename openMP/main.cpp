@@ -55,6 +55,9 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+    //GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "Sequential", primaryMonitor, NULL);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // for MAC
     GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "OpenMP", NULL, NULL);
     if (window == NULL)
@@ -104,30 +107,45 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for(int i = 0; i < 2000; i++){
+    for(int i = 0; i < 10000; i++){
         ps.addParticle(1.0f);
     }
     ps.prepRender();
     glfwSwapInterval(1);
     float lastTime = glfwGetTime();
     float targetFrameTime = 1.0f/60.0f;//should be 60fps
+  auto startTime = std::chrono::high_resolution_clock::now();
+    int frameCount = 0;
+    glUseProgram(shaderProgram);
     while (!glfwWindowShouldClose(window))
     {
-        float curTime = glfwGetTime();
-        float dt = curTime-lastTime;
-        lastTime = curTime;
+        auto curTime = std::chrono::high_resolution_clock::now();
+
+            std::chrono::duration<double> elapsed = curTime - startTime;
+
+         if (elapsed.count() >= 30.0) {
+        break;
+    }
+     float dt = glfwGetTime() - lastTime;
+       lastTime = glfwGetTime();
         glClear(GL_COLOR_BUFFER_BIT);
         processInput(window);
-        glUseProgram(shaderProgram);
         ps.render(dt);
         glfwSwapBuffers(window);
         glfwPollEvents(); // checks if events are triggered
-        float frameDuration = glfwGetTime() - curTime;
+        //float frameDuration = glfwGetTime() - curTime;
+        /*
         if (frameDuration < targetFrameTime) {//helps maintain frame rate
             float sleepTime = targetFrameTime - frameDuration;
             std::this_thread::sleep_for(std::chrono::duration<float>(sleepTime));
         }
+*/
+        frameCount++;
     }
+    auto endTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = endTime - startTime;
+    double averageFPS = frameCount / elapsed.count();
+    std::cout << "Average FPS: " << averageFPS << std::endl; 
     glfwTerminate();
     return 0;
 }

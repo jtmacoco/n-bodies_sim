@@ -76,11 +76,8 @@ void Particles::addParticle(float mass)
 __host__ void Particles::render(float dt)
 {
     dt = 0.001; // maybe adjust
-    glBindVertexArray(VAO);
     std::vector<float> vertex_data;
     int threadsPerBlock = 1024; 
-    //int maxBlocks = 256;
-    //int blocksPerGrid =maxBlocks;
     int blocksPerGrid = (MX_PARTICLES + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
     sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces);
     applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt);
@@ -91,6 +88,7 @@ __host__ void Particles::render(float dt)
         vertex_data.push_back(x);
         vertex_data.push_back(y);
     }
+    glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     /*
         note allocating space for the memory in prep can now can just fill the space with
