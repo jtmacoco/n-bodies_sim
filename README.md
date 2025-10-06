@@ -7,3 +7,11 @@
 
 # Sequential Version
 ![sequential](./videos/sequential.gif)
+
+# Simulations Metrics
+
+| Version    | Max Number of Particles |
+|:-----------:|:-----------------------:|
+| Sequential | 700                    |
+| OpenMP     | 2000                   |
+| CUDA       | 10000                  |
