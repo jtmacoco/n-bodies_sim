@@ -106,7 +106,7 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < 100; i++)
     {
         ps.addParticle(1.0f);
     }
@@ -124,10 +124,6 @@ int main()
 
         std::chrono::duration<double> elapsed = curTime - startTime;
 
-        if (elapsed.count() >= 30.0)
-        {
-            break;
-        }
         float dt = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
         glClear(GL_COLOR_BUFFER_BIT);

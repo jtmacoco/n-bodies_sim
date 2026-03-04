@@ -1,17 +1,18 @@
 #pragma once
 #include <vector>
+#include <glad/glad.h>
 #include <random>
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cmath>
+#include <cuda_gl_interop.h>
 #include "particle.h"
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>
 // #define G 6.674e-11
 #define G 1.0f // set to 1 because actual G constant is super small
-#define MX_PARTICLES 10000
+#define MX_PARTICLES 15000
 #define BLOCK_SIZE 1024
 
 class Particles
@@ -46,5 +47,6 @@ private:
     float3 avg_vel;
     float3 *forces;
     float3 *pos;
+    struct cudaGraphicsResource *cuda_vbo_resource;
     float particle_size;
 };

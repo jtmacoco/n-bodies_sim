@@ -6,3 +6,4 @@ include/
 .vscode/
 settings.json
 dummy.txt
+src/

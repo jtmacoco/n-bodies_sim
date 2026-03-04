@@ -50,6 +50,15 @@ __global__ void applyForces(
      if(i >= MX_PARTICLES){return;}
         particles[i].applyForce(forces[i], dt);
 }
+
+__global__ void updateVBO(Particle *particles, float2 *vbo)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= MX_PARTICLES) return;
+    float3 pos = particles[i].getPosition();
+    vbo[i] = make_float2(pos.x, pos.y);
+}
+
 void Particles::prepRender()
 {
 
@@ -58,10 +67,11 @@ void Particles::prepRender()
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * 2 * MX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * MX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+    cudaGraphicsGLRegisterBuffer(&cuda_vbo_resource, VBO, cudaGraphicsMapFlagsWriteDiscard);
 }
 
 /*
@@ -76,25 +86,19 @@ void Particles::addParticle(float mass)
 __host__ void Particles::render(float dt)
 {
     dt = 0.001; // maybe adjust
-    std::vector<float> vertex_data;
     int threadsPerBlock = 1024; 
     int blocksPerGrid = (MX_PARTICLES + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
     sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces);
     applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt);
-    cudaDeviceSynchronize();
-    for(int i=0; i < MX_PARTICLES; i++){
-        float x = particles[i].getPosition().x;
-        float y = particles[i].getPosition().y;
-        vertex_data.push_back(x);
-        vertex_data.push_back(y);
-    }
+
+    float2 *d_vbo_ptr;
+    size_t num_bytes;
+    cudaGraphicsMapResources(1, &cuda_vbo_resource, 0);
+    cudaGraphicsResourceGetMappedPointer((void **)&d_vbo_ptr, &num_bytes, cuda_vbo_resource);
+    updateVBO<<<blocksPerGrid, threadsPerBlock>>>(particles, d_vbo_ptr);
+    cudaGraphicsUnmapResources(1, &cuda_vbo_resource, 0);
+
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    /*
-        note allocating space for the memory in prep can now can just fill the space with
-        vertex data. SubData "reserve a specific amount of memory" CH.28
-    */
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_data.size() * sizeof(GLfloat), vertex_data.data());
     glPointSize(particle_size);
     glDrawArrays(GL_POINTS, 0, MX_PARTICLES);
     glBindVertexArray(0);
