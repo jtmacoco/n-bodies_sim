@@ -37,32 +37,51 @@ void Particles::render(float dt)
 }
 void Particles::addParticle(float mass)
 {
-    glm::vec3 pos = randCircle();
-    glm::vec3 vel = randCircle();
+    glm::vec3 pos, vel;
+    std::tie(pos, vel) = randCircle();
     std::shared_ptr<Particle> p(new Particle(pos, vel, mass)); // change this to glm::vec3 for pos and vel
     particles.push_back(p);
 }
 
 
-glm::vec3 Particles::randCircle()
+std::tuple<glm::vec3, glm::vec3> Particles::randCircle()
 {
     static std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
-    static std::uniform_real_distribution<float> dist_radius(0.0f, 0.8f);
+    static std::uniform_real_distribution<float> dist_radius(0.1f, 0.8f); // Min avoid division by zero
 
     float theta = dist_theta(gen);
     float r = dist_radius(gen);
-    return glm::vec3(std::cos(theta), std::sin(theta), 0.0f) * r;
+
+    float center_mass = 1000.0f;
+    float vel_mag = std::sqrt(G * center_mass / r);
+
+    glm::vec3 pos = glm::vec3(std::cos(theta), std::sin(theta), 0.0f) * r;
+    glm::vec3 vel = glm::vec3(-std::sin(theta), std::cos(theta), 0.0f) * vel_mag;
+
+    return std::make_tuple(pos, vel);
 }
 /*summing up the forces*/
 void Particles::sumForces(float dt)
 {
     std::vector<glm::vec3> force_sums(particles.size(), glm::vec3(0.0f));
+    float center_mass = 1000.0f; // Must match the mass used in randCircle
+    glm::vec3 center_pos(0.0f);
 
     #pragma omp parallel for
     for (int i = 0; i < int(particles.size()); i++)
     {
         std::shared_ptr<Particle> cur_particle = particles[i];
         glm::vec3 force_sum(0.0f);
+
+        //Apply force from center
+        glm::vec3 dist_vec = center_pos - cur_particle->getPosition();
+        float r = glm::length(dist_vec);
+        if (r > 0.01f) // Avoid singularity
+        {
+            float force_mag = G * center_mass * cur_particle->getMass() / (r * r);
+            force_sum += glm::normalize(dist_vec) * force_mag;
+        }
+
         for (int j = i + 1; j < int(particles.size()); j++)
         {
             force_sum += gravitationalForce(*cur_particle, *particles[j]);

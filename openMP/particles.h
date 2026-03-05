@@ -25,8 +25,7 @@ class Particles
         void initVel();
         void initPos();
         void initSystem();
-        //std::tuple<glm::vec3, glm::vec3> randCircle();
-        glm::vec3 randCircle();
+        std::tuple<glm::vec3, glm::vec3> randCircle();
         glm::vec3 gravitationalForce(Particle p1, Particle p2);
 
     private:
