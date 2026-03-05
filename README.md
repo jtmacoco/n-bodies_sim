@@ -10,8 +10,12 @@
 
 # Simulations Metrics
 
+
 | Version    | Max Number of Particles |
 |:-----------:|:-----------------------:|
 | Sequential | 700                    |
 | OpenMP     | 2000                   |
 | CUDA       | 20000                  |
+
+
+![FPS](./benchmarks/benchmark_results.png)

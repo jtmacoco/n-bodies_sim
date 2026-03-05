@@ -49,8 +49,12 @@ GLuint CompileShader(GLenum type, const std::string &source)
     }
     return shader;
 }
-int main()
+int main(int argc, char* argv[])
 {
+    int particle_count = 1000;
+    if (argc > 1)
+        particle_count = std::atoi(argv[1]);
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -75,7 +79,7 @@ int main()
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // will resize viewpoart when window re-sizes
 
-    Particles ps;
+    Particles ps(particle_count);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -119,7 +123,7 @@ int main()
 
             std::chrono::duration<double> elapsed = curTime - startTime;
 
-         if (elapsed.count() >= 30.0) {
+         if (elapsed.count() >= 10.0) {
         break;
     }
      float dt = glfwGetTime() - lastTime;

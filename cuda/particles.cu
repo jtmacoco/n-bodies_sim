@@ -20,15 +20,16 @@ __device__ float3 gravitationalForce(Particle p1, Particle p2)
 }
 __global__ void sumForces(
     Particle *particles,
-    float3 *forces)
+    float3 *forces,
+    int num_particles)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if(i >= MX_PARTICLES){return;}
+    if(i >= num_particles){return;}
     Particle &cur_particle = particles[i];
     float3 force_sum = make_float3(0.0f, 0.0f, 0.0f);
 
     // Apply force from center
-    float center_mass = 1000.0f;
+    float center_mass = 1.0f;
     float3 pos = cur_particle.getPosition();
     float3 dist_vec = make_float3(-pos.x, -pos.y, -pos.z); // Center is (0,0,0)
     float r = sqrtf(dist_vec.x * dist_vec.x + dist_vec.y * dist_vec.y + dist_vec.z * dist_vec.z);
@@ -41,7 +42,7 @@ __global__ void sumForces(
         force_sum.z += (dist_vec.z / r) * force_mag;
     }
 
-    for (int j = 0; j < MX_PARTICLES; j++)
+    for (int j = 0; j < num_particles; j++)
     {
         if (j == i)
         {
@@ -59,17 +60,18 @@ __global__ void sumForces(
 __global__ void applyForces(
     Particle *particles,
     float3 *forces,
-    float dt)
+    float dt,
+    int num_particles)
 {
      int i = blockIdx.x * blockDim.x + threadIdx.x;
-     if(i >= MX_PARTICLES){return;}
+     if(i >= num_particles){return;}
         particles[i].applyForce(forces[i], dt);
 }
 
-__global__ void updateVBO(Particle *particles, float2 *vbo)
+__global__ void updateVBO(Particle *particles, float2 *vbo, int num_particles)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= MX_PARTICLES) return;
+    if (i >= num_particles) return;
     float3 pos = particles[i].getPosition();
     vbo[i] = make_float2(pos.x, pos.y);
 }
@@ -82,7 +84,7 @@ void Particles::prepRender()
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * MX_PARTICLES, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * num_particles, NULL, GL_DYNAMIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
@@ -102,20 +104,20 @@ __host__ void Particles::render(float dt)
 {
     dt = 0.001; // maybe adjust
     int threadsPerBlock = 1024; 
-    int blocksPerGrid = (MX_PARTICLES + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
-    sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces);
-    applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt);
+    int blocksPerGrid = (num_particles + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
+    sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces,num_particles);
+    applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt,num_particles);
 
     float2 *d_vbo_ptr;
     size_t num_bytes;
     cudaGraphicsMapResources(1, &cuda_vbo_resource, 0);
     cudaGraphicsResourceGetMappedPointer((void **)&d_vbo_ptr, &num_bytes, cuda_vbo_resource);
-    updateVBO<<<blocksPerGrid, threadsPerBlock>>>(particles, d_vbo_ptr);
+    updateVBO<<<blocksPerGrid, threadsPerBlock>>>(particles, d_vbo_ptr, num_particles);
     cudaGraphicsUnmapResources(1, &cuda_vbo_resource, 0);
 
     glBindVertexArray(VAO);
     glPointSize(particle_size);
-    glDrawArrays(GL_POINTS, 0, MX_PARTICLES);
+    glDrawArrays(GL_POINTS, 0, num_particles);
     glBindVertexArray(0);
 }
 void Particles::initParticles()
@@ -123,7 +125,7 @@ void Particles::initParticles()
     std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
     std::uniform_real_distribution<float> dist_radius(0.1f, 0.8f);
 
-    for (int i = 0; i < MX_PARTICLES; i++)
+    for (int i = 0; i < num_particles; i++)
     {
         float theta = dist_theta(gen);
         float r = dist_radius(gen);
@@ -153,7 +155,7 @@ float3 Particles::randCircle()
 void Particles::initVel()
 {
     avg_vel = make_float3(0.0f, 0.0f, 0.0f);
-    for (int i = 0; i < MX_PARTICLES; i++)
+    for (int i = 0; i < num_particles; i++)
     {
         float3 cur_vel = particles[i].getVelocity();
         float cur_mass = particles[i].getMass();
@@ -162,15 +164,15 @@ void Particles::initVel()
         avg_vel.y += (cur_vel.y * cur_mass);
         avg_vel.z += (cur_vel.z * cur_mass);
     }
-    avg_vel.x /= MX_PARTICLES;
-    avg_vel.y /= MX_PARTICLES;
-    avg_vel.z /= MX_PARTICLES;
+    avg_vel.x /= num_particles;
+    avg_vel.y /= num_particles;
+    avg_vel.z /= num_particles;
 }
 /*grab center of mass of the system basically*/
 void Particles::initPos()
 {
     center_mass = make_float3(0.0f, 0.0f, 0.0f);
-    for (int i = 0; i < MX_PARTICLES; i++)
+    for (int i = 0; i < num_particles; i++)
     {
         float3 cur_pos = particles[i].getPosition();
         float cur_mass = particles[i].getMass();
@@ -178,9 +180,9 @@ void Particles::initPos()
         center_mass.y += (cur_pos.y * cur_mass);
         center_mass.z += (cur_pos.z * cur_mass);
     }
-    center_mass.x /= MX_PARTICLES;
-    center_mass.y /= MX_PARTICLES;
-    center_mass.z /= MX_PARTICLES;
+    center_mass.x /= num_particles;
+    center_mass.y /= num_particles;
+    center_mass.z /= num_particles;
 }
 /*This is meant to intilize the conditions at the start of the simulation.*/
 void Particles::initSystem()
@@ -188,7 +190,7 @@ void Particles::initSystem()
     initParticles();
     initVel();
     initPos();
-    for (int i = 0; i < MX_PARTICLES; i++)
+    for (int i = 0; i < num_particles; i++)
     {
         particles[i].setPosition((center_mass)); // note not realy setting but doing p pos-= center of mass
         particles[i].setVelocity(avg_vel);       // note not really setting but doing  p vel -= avg_vel

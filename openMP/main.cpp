@@ -49,8 +49,12 @@ GLuint CompileShader(GLenum type, const std::string &source)
     }
     return shader;
 }
-int main()
+int main(int argc, char* argv[])
 {
+    int num_particles = 1000;
+    if (argc > 1)
+        num_particles = std::atoi(argv[1]);
+    
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -107,7 +111,7 @@ int main()
     glUseProgram(shaderProgram);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < num_particles; i++){
         ps.addParticle(1.0f);
     }
     ps.prepRender();
@@ -123,7 +127,7 @@ int main()
 
             std::chrono::duration<double> elapsed = curTime - startTime;
 
-         if (elapsed.count() >= 30.0) {
+         if (elapsed.count() >= 10.0) {
         break;
     }
      float dt = glfwGetTime() - lastTime;

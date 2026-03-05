@@ -12,17 +12,15 @@
 #include <iostream>
 // #define G 6.674e-11
 #define G 1.0f // set to 1 because actual G constant is super small
-#define MX_PARTICLES 20000
 #define BLOCK_SIZE 1024
 
 class Particles
 {
 public:
-    Particles()
+    Particles(int n_particles = 1000) : num_particles(n_particles)
     {
-
-        cudaMallocManaged(&forces, sizeof(float3) * MX_PARTICLES);
-        cudaMallocManaged(&particles, sizeof(Particle) * MX_PARTICLES);
+        cudaMallocManaged(&forces, sizeof(float3) * n_particles);
+        cudaMallocManaged(&particles, sizeof(Particle) * n_particles);
         gen.seed(1);
         particle_size = 3.0f;
     };
@@ -36,6 +34,7 @@ public:
     void initSystem();
     // float3 gravitationalForce(Particle p1, Particle p2);
     float3 randCircle();
+    int getNumParticles() const { return num_particles; }
 
 private:
     GLuint VAO;
@@ -49,4 +48,5 @@ private:
     float3 *pos;
     struct cudaGraphicsResource *cuda_vbo_resource;
     float particle_size;
+    int num_particles;
 };
