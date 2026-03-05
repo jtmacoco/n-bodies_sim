@@ -37,49 +37,49 @@ void Particles::render(float dt)
 }
 void Particles::addParticle(float mass)
 {
-    /*
-    glm::vec3 position, v;
-    std::tie(v, position) = randCircle();
-    glm::vec3 pos = std::get<1>(randCircle());  // Accesses the second element (position)
-    glm::vec3 vel = std::get<0>(randCircle());
-*/
-    glm::vec3 pos = randCircle();
-    glm::vec3 vel = randCircle();
+    glm::vec3 pos, vel;
+    std::tie(pos, vel) = randCircle();
     std::shared_ptr<Particle> p(new Particle(pos, vel, mass)); // change this to glm::vec3 for pos and vel
     particles.push_back(p);
 }
 
 /*Initlizing random position and velocities to be within a circle that is of random radius*/
-/*
-std::tuple<glm::vec3,glm::vec3> Particles::randCircle(){
-    static std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
-    static std::uniform_real_distribution<float> dist_radius(0.0f, 10.0f);
-
-    float theta = dist_theta(gen);
-    float r = dist_radius(gen);
-
-    float tangential_force = sqrt(G * 1.0/r);
-    glm::vec3 v = glm::vec3(-std::sin(theta), std::cos(theta), 0.0f) * tangential_force;
-    glm::vec3 p = glm::vec3(std::cos(theta),std::sin(theta),0.0f)*r;
-    return std::make_tuple(p,v);
-}
-*/
-glm::vec3 Particles::randCircle()
+std::tuple<glm::vec3, glm::vec3> Particles::randCircle()
 {
     static std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
-    static std::uniform_real_distribution<float> dist_radius(0.0f, 0.8f);
+    static std::uniform_real_distribution<float> dist_radius(0.1f, 0.8f); // Min avoid division by zero
 
     float theta = dist_theta(gen);
     float r = dist_radius(gen);
-    return glm::vec3(std::cos(theta), std::sin(theta), 0.0f) * r;
+
+    float center_mass = 1000.0f;
+    float vel_mag = std::sqrt(G * center_mass / r);
+
+    glm::vec3 pos = glm::vec3(std::cos(theta), std::sin(theta), 0.0f) * r;
+    glm::vec3 vel = glm::vec3(-std::sin(theta), std::cos(theta), 0.0f) * vel_mag;
+
+    return std::make_tuple(pos, vel);
 }
 /*summing up the forces*/
 void Particles::sumForces(float dt)
 {
+    float center_mass = 1000.0f; // Must match the mass used in randCircle
+    glm::vec3 center_pos(0.0f);
+
     for (int i = 0; i < int(particles.size()); i++)
     {
         std::shared_ptr<Particle> cur_particle = particles[i];
         glm::vec3 force_sum(0.0f);
+
+        //Apply force from center
+        glm::vec3 dist_vec = center_pos - cur_particle->getPosition();
+        float r = glm::length(dist_vec);
+        if (r > 0.01f) // Avoid singularity
+        {
+            float force_mag = G * center_mass * cur_particle->getMass() / (r * r);
+            force_sum += glm::normalize(dist_vec) * force_mag;
+        }
+
         for (int j = i + 1; j < int(particles.size()); j++)
         {
             if (j == i)

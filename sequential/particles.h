@@ -8,8 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>
-//#define G 6.674e-11
-#define G 1.0f//set to 1 because actual G constant is super small
+#define G 1.0f
 class Particles
 {
     public:
@@ -24,8 +23,7 @@ class Particles
         void initVel();
         void initPos();
         void initSystem();
-        //std::tuple<glm::vec3, glm::vec3> randCircle();
-        glm::vec3 randCircle();
+        std::tuple<glm::vec3, glm::vec3> randCircle();
         glm::vec3 gravitationalForce(Particle p1, Particle p2);
 
     private:
