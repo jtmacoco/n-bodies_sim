@@ -12,7 +12,7 @@
 #include <iostream>
 // #define G 6.674e-11
 #define G 1.0f // set to 1 because actual G constant is super small
-#define MX_PARTICLES 15000
+#define MX_PARTICLES 10000
 #define BLOCK_SIZE 1024
 
 class Particles

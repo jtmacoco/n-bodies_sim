@@ -26,6 +26,21 @@ __global__ void sumForces(
     if(i >= MX_PARTICLES){return;}
     Particle &cur_particle = particles[i];
     float3 force_sum = make_float3(0.0f, 0.0f, 0.0f);
+
+    // Apply force from center
+    float center_mass = 1000.0f;
+    float3 pos = cur_particle.getPosition();
+    float3 dist_vec = make_float3(-pos.x, -pos.y, -pos.z); // Center is (0,0,0)
+    float r = sqrtf(dist_vec.x * dist_vec.x + dist_vec.y * dist_vec.y + dist_vec.z * dist_vec.z);
+
+    if (r > 0.01f) // Avoid singularity
+    {
+        float force_mag = G * center_mass * cur_particle.getMass() / (r * r);
+        force_sum.x += (dist_vec.x / r) * force_mag;
+        force_sum.y += (dist_vec.y / r) * force_mag;
+        force_sum.z += (dist_vec.z / r) * force_mag;
+    }
+
     for (int j = 0; j < MX_PARTICLES; j++)
     {
         if (j == i)
@@ -105,10 +120,17 @@ __host__ void Particles::render(float dt)
 }
 void Particles::initParticles()
 {
+    std::uniform_real_distribution<float> dist_theta(0.0f, 2.0f * M_PI);
+    std::uniform_real_distribution<float> dist_radius(0.1f, 0.8f);
+
     for (int i = 0; i < MX_PARTICLES; i++)
     {
-        float3 vel = randCircle();
-        float3 pos = randCircle();
+        float theta = dist_theta(gen);
+        float r = dist_radius(gen);
+        float center_mass = 1000.0f;
+        float vel_mag = std::sqrt(G * center_mass / r);
+        float3 pos = make_float3(std::cos(theta) * r, std::sin(theta) * r, 0.0f);
+        float3 vel = make_float3(-std::sin(theta) * vel_mag, std::cos(theta) * vel_mag, 0.0f);
         particles[i] = Particle(pos, vel, 1.0f);
     }
 }
