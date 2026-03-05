@@ -103,10 +103,33 @@ void Particles::addParticle(float mass)
 __host__ void Particles::render(float dt)
 {
     dt = 0.001; // maybe adjust
+
     int threadsPerBlock = 1024; 
     int blocksPerGrid = (num_particles + threadsPerBlock - 1) / threadsPerBlock;//cal number of blocks to cover all particles
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start);
     sumForces<<<blocksPerGrid,threadsPerBlock>>>(particles,forces,num_particles);
     applyForces<<<blocksPerGrid, threadsPerBlock>>>(particles, forces, dt,num_particles);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+    
+    float seconds = milliseconds / 1000.0f;
+    // N * (N-1) * 23 FLOPs
+    double total_flops = (double)num_particles * (num_particles - 1) * 23.0; 
+    double gflops = (total_flops / seconds) / 1e9; // Divide by 1 billion
+    
+    // Print it out occasionally so you don't spam the console
+    static int frame_counter = 0;
+    if (frame_counter++ % 60 == 0) {
+        std::cout << "Compute Time: " << milliseconds << " ms | Throughput: " << gflops << " GFLOPS" << std::endl;
+    }
+
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 
     float2 *d_vbo_ptr;
     size_t num_bytes;

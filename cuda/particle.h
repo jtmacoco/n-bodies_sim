@@ -5,12 +5,12 @@
 class Particle
 {
 public:
-    Particle(float3 pos, float3 velocity, float mass) : pos(pos), velocity(velocity), mass(mass)
+    __host__ __device__ Particle(float3 pos, float3 velocity, float mass) : pos(pos), velocity(velocity), mass(mass)
     {
         force = 0.0f;
         acceleration = make_float3(0.0f, 0.0f, 0.0f);
     }; 
-    Particle() : pos(make_float3(0.0f, 0.0f, 0.0f)),
+    __host__ __device__ Particle() : pos(make_float3(0.0f, 0.0f, 0.0f)),
                  velocity(make_float3(0.0f, 0.0f, 0.0f)),
                  mass(0.0f), force(0.0f), acceleration(make_float3(0.0f, 0.0f, 0.0f)) {}
 
